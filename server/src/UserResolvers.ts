@@ -1,7 +1,9 @@
-import {Arg, Field, Mutation, ObjectType, Query, Resolver} from 'type-graphql'
+import {Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver, UseMiddleware} from 'type-graphql'
 import {compare, hash} from 'bcryptjs'
 import {User} from "./entity/User";
-import {sign} from 'jsonwebtoken';
+import { MyContext } from './MyContext';
+import { createAccessToken, createRefreshToken } from './auth';
+import { isAuth } from './isAuthMiddleware';
 
 @ObjectType()
 class LoginResponse {
@@ -16,6 +18,12 @@ export class UserResolver {
         return 'hi!'
     }
 
+    @Query(() => String)
+    @UseMiddleware(isAuth)
+    bye(@Ctx() {payload}: MyContext) {
+        return `your user id is ${payload!.userId}`;
+    }
+
     @Query(() => [User])
     users() {
         return User.find();
@@ -24,7 +32,8 @@ export class UserResolver {
     @Mutation(() => LoginResponse)
     async login(
         @Arg('email', () => String) email: string,
-        @Arg('password', () => String) password: string
+        @Arg('password', () => String) password: string,
+        @Ctx() {res}: MyContext
     ): Promise<LoginResponse> {
 
         const user = await User.findOne({where: {email}});
@@ -41,8 +50,10 @@ export class UserResolver {
 
         // login successfull
 
+        res.cookie("jid", createRefreshToken(user), {httpOnly: true, maxAge: 604800*1000})
+
         return {
-            accessToken: sign({userId: user.id, }, 'thisisthesecretused', {expiresIn: "15m"})
+            accessToken: createAccessToken(user)
         }
 
     }
