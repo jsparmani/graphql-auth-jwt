@@ -1,5 +1,5 @@
 import {MiddlewareFn} from "type-graphql";
-import {MyContext} from "./MyContext";
+import {MyContext} from "../utils/MyContext";
 import {verify} from "jsonwebtoken";
 
 export const isAuth: MiddlewareFn<MyContext> = ({context}, next) => {
