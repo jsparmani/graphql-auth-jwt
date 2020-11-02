@@ -82,7 +82,7 @@ export class UserResolver {
             email: email,
             password: hashedPassword
         })
-        } catch(err ) {
+        } catch(err) {
             console.log(err);
             return false;
         }

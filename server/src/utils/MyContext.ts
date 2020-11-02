@@ -1,7 +1,7 @@
-import {Request, Response} from 'express';
+import {Request, Response} from "express";
 
 export interface MyContext {
-    req: Request,
-    res: Response,
-    payload?: {userId: string, tokenVersion: number};
+    req: Request;
+    res: Response;
+    payload?: {userId: string; tokenVersion: number};
 }
